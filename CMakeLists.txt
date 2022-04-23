@@ -1,7 +1,11 @@
-cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.21 FATAL_ERROR)
 project(CsInterop)
 
 set(CMAKE_CXX_STANDARD 20)
+
+list(APPEND CMAKE_MODULE_PATH
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/module"
+)
 
 string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_UPPER)
 if(CMAKE_BUILD_TYPE_UPPER STREQUAL "RELEASE")
@@ -83,37 +87,12 @@ if(CSINTEROP_USE_EXTENSIVE_WARNINGS)
     endif()
 endif()
 
-find_path(NETHOST_INCLUDE_DIRS nethost.h)
-find_library(NETHOST_LIBRARY NAMES libnethost nethost)
-
 find_package(fmt           CONFIG REQUIRED)
 find_package(Microsoft.GSL CONFIG REQUIRED)
-
-# TODO: Fix search method for Mono. This is just a temporary solution.
-set(MONO_ROOT $ENV{MONO_ROOT})
-cmake_path(CONVERT $ENV{MONO_ROOT} TO_CMAKE_PATH_LIST MONO_ROOT)
-set(MONO_INCLUDE_DIRS ${MONO_ROOT}/include/mono-2.0)
-set(MONO_LIBRARY_DIR ${MONO_ROOT}/lib)
-set(MONO_LIBRARIES
-    ${MONO_LIBRARY_DIR}/mono-2.0-sgen.lib
-    ws2_32
-    psapi
-    ole32
-    winmm
-    oleaut32
-    advapi32
-    version
-)
-
-message(STATUS "MONO_ROOT=${MONO_ROOT}")
+find_package(Mono2                REQUIRED)
 
 add_executable(csinterop
     src/main.cpp
-)
-
-target_include_directories(csinterop
-    PRIVATE
-        ${MONO_INCLUDE_DIRS}
 )
 
 target_compile_definitions(csinterop
@@ -127,5 +106,10 @@ target_link_libraries(csinterop
     PRIVATE
         fmt::fmt
         Microsoft.GSL::GSL
-        ${MONO_LIBRARIES}
+        Mono::Mono2
+)
+
+add_custom_command(TARGET csinterop POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:csinterop> $<TARGET_FILE_DIR:csinterop>
+    COMMAND_EXPAND_LISTS
 )
