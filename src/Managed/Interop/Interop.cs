@@ -77,6 +77,12 @@ public static class Interop
 
     private static async Task<Configuration?> TryReadConfigAsync()
     {
+        if (!File.Exists(Persistent.ConfigFilePath))
+        {
+            Console.WriteLine("Config does not exist.");
+            return null;
+        }
+
         using StreamReader stream = File.OpenText(Persistent.ConfigFilePath);
         string configToml = await stream.ReadToEndAsync();
 
