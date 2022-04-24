@@ -24,6 +24,14 @@ find_file(MONO2_SHARED_LIBRARY mono-2.0-sgen${CMAKE_SHARED_LIBRARY_SUFFIX}
     NO_DEFAULT_PATH
 )
 
+find_file(MONO2_MSCORLIB mscorlib${CMAKE_SHARED_LIBRARY_SUFFIX}
+    PATHS "${MONO2_ROOT}"
+    PATH_SUFFIXES lib/mono/4.5
+    NO_DEFAULT_PATH
+)
+
+set(MONO2_ETC_DIRECTORY "${MONO2_ROOT}/etc")
+
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Mono2
     REQUIRED_VARS MONO2_INCLUDE_DIR MONO2_LIBRARY MONO2_SHARED_LIBRARY

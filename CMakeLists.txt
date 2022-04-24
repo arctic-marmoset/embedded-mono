@@ -115,4 +115,13 @@ add_custom_command(TARGET csinterop POST_BUILD
     COMMAND_EXPAND_LISTS
 )
 
-# TODO: Copy Mono/etc and required Mono/lib files to output. Debug symbols should also be copied for Debug builds.
+add_custom_command(TARGET csinterop POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:csinterop>/Mono/etc
+    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:csinterop>/Mono/lib/mono/4.5
+    COMMAND ${CMAKE_COMMAND} -E copy ${MONO2_MSCORLIB} $<TARGET_FILE_DIR:csinterop>/Mono/lib/mono/4.5
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${MONO2_ETC_DIRECTORY} $<TARGET_FILE_DIR:csinterop>/Mono/etc
+    COMMAND_EXPAND_LISTS
+)
+
+# TODO: Copy dependencies (e.g. System, System.Core) to Managed directory.
+# TODO: Copy DLL debug symbols for Debug builds.
