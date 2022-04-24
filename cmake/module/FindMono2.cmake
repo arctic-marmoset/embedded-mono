@@ -1,5 +1,5 @@
 if(DEFINED ENV{MONO_ROOT})
-    set(MONO2_ROOT "${MONO_ROOT}" CACHE PATH "Mono2 root directory")
+    set(MONO2_ROOT "$ENV{MONO_ROOT}" CACHE PATH "Mono2 root directory")
 endif()
 
 if(WIN32 AND NOT DEFINED MONO2_ROOT)

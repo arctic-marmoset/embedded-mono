@@ -31,7 +31,7 @@ namespace
     }
 }
 
-namespace gss::scripting
+namespace managed
 {
     class mono_context
     {
@@ -151,9 +151,9 @@ int main(int argc, char *argv[])
 
     const fs::path executable_path = executable_absolute_path(argc, argv);
     fs::path mono_path = executable_path.parent_path() / MONO_RELATIVE_DIR;
-    auto script_worker = std::thread([path = std::move(mono_path), debug]
+    auto managed_worker = std::thread([path = std::move(mono_path), debug]
     {
-        gss::scripting::entry(path, debug);
+        managed::entry(path, debug);
     });
 
     for (int i = 0; i < 20; ++i)
@@ -162,6 +162,6 @@ int main(int argc, char *argv[])
         std::this_thread::sleep_for(100ms);
     }
 
-    script_worker.join();
+    managed_worker.join();
     fmt::print("Exit code is: {:#x}\n", exit_code);
 }

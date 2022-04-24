@@ -1,8 +1,7 @@
 {
-  "name": "cs-interop",
+  "name": "embedded-mono",
   "version-string": "0.1.0",
   "dependencies": [
-    "fmt",
-    "ms-gsl"
+    "fmt"
   ]
 }

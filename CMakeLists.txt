@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21 FATAL_ERROR)
-project(CsInterop)
+project(EmbeddedMono)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -16,18 +16,18 @@ if(CMAKE_BUILD_TYPE_UPPER STREQUAL "RELEASE")
     endif()
 endif()
 
-option(CSINTEROP_USE_EXTENSIVE_WARNINGS "Enable additional compiler warnings" ON)
+option(EMBEDDED_MONO_USE_EXTENSIVE_WARNINGS "Enable additional compiler warnings" ON)
 
 if(MSVC)
     string(REGEX REPLACE "[-/]W[1-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    set(CSINTEROP_WARN_FLAGS /W4 /permissive-)
+    set(EMBEDDED_MONO_WARN_FLAGS /W4 /permissive-)
 else()
-    set(CSINTEROP_WARN_FLAGS -Wall -Wextra -Wpedantic)
+    set(EMBEDDED_MONO_WARN_FLAGS -Wall -Wextra -Wpedantic)
 endif()
 
-if(CSINTEROP_USE_EXTENSIVE_WARNINGS)
+if(EMBEDDED_MONO_USE_EXTENSIVE_WARNINGS)
     if(MSVC)
-        list(APPEND CSINTEROP_WARN_FLAGS
+        list(APPEND EMBEDDED_MONO_WARN_FLAGS
             /w14242 # possible loss of data: conversion from `type1` to `type2`
             /w14254 # possible loss of data: conversion from `type1:field_bits`
                     # to `type2:field_bits`
@@ -58,7 +58,7 @@ if(CSINTEROP_USE_EXTENSIVE_WARNINGS)
                     # conversion has been implicitly applied
         )
     else()
-        list(APPEND CSINTEROP_WARN_FLAGS
+        list(APPEND EMBEDDED_MONO_WARN_FLAGS
             -Wshadow
             -Wnon-virtual-dtor
             -Wold-style-cast
@@ -74,52 +74,50 @@ if(CSINTEROP_USE_EXTENSIVE_WARNINGS)
     endif()
 
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        list(APPEND CSINTEROP_WARN_FLAGS
+        list(APPEND EMBEDDED_MONO_WARN_FLAGS
             -Wduplicated-cond
             -Wduplicated-branches
             -Wlogical-op
             -Wuseless-cast
         )
     elseif(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
-        list(APPEND CSINTEROP_WARN_FLAGS
+        list(APPEND EMBEDDED_MONO_WARN_FLAGS
             -Wshorten-64-to-32
         )
     endif()
 endif()
 
-find_package(fmt           CONFIG REQUIRED)
-find_package(Microsoft.GSL CONFIG REQUIRED)
-find_package(Mono2                REQUIRED)
+find_package(fmt   CONFIG REQUIRED)
+find_package(Mono2        REQUIRED)
 
-add_executable(csinterop
+add_executable(embedded-mono
     src/main.cpp
 )
 
-target_compile_definitions(csinterop
+target_compile_definitions(embedded-mono
     PRIVATE
         MONO_RELATIVE_DIR="mono"
 )
 
-target_compile_options(csinterop PRIVATE ${CSINTEROP_WARN_FLAGS})
+target_compile_options(embedded-mono PRIVATE ${EMBEDDED_MONO_WARN_FLAGS})
 
-target_link_libraries(csinterop
+target_link_libraries(embedded-mono
     PRIVATE
         fmt::fmt-header-only
-        Microsoft.GSL::GSL
         Mono::Mono2
 )
 
 # TODO: This should ideally be set up as a custom target to be depended on.
-add_custom_command(TARGET csinterop POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${MONO2_SHARED_LIBRARY} $<TARGET_FILE_DIR:csinterop>
+add_custom_command(TARGET embedded-mono POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${MONO2_SHARED_LIBRARY} $<TARGET_FILE_DIR:embedded-mono>
     COMMAND_EXPAND_LISTS
 )
 
-add_custom_command(TARGET csinterop POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:csinterop>/Mono/etc
-    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:csinterop>/Mono/lib/mono/4.5
-    COMMAND ${CMAKE_COMMAND} -E copy ${MONO2_MSCORLIB} $<TARGET_FILE_DIR:csinterop>/Mono/lib/mono/4.5
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${MONO2_ETC_DIRECTORY} $<TARGET_FILE_DIR:csinterop>/Mono/etc
+add_custom_command(TARGET embedded-mono POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:embedded-mono>/Mono/etc
+    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:embedded-mono>/Mono/lib/mono/4.5
+    COMMAND ${CMAKE_COMMAND} -E copy ${MONO2_MSCORLIB} $<TARGET_FILE_DIR:embedded-mono>/Mono/lib/mono/4.5
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${MONO2_ETC_DIRECTORY} $<TARGET_FILE_DIR:embedded-mono>/Mono/etc
     COMMAND_EXPAND_LISTS
 )
 
