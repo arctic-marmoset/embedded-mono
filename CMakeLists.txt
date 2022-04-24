@@ -97,19 +97,22 @@ add_executable(csinterop
 
 target_compile_definitions(csinterop
     PRIVATE
-        MONO_ROOT="${MONO_ROOT}"
+        MONO_RELATIVE_DIR="mono"
 )
 
 target_compile_options(csinterop PRIVATE ${CSINTEROP_WARN_FLAGS})
 
 target_link_libraries(csinterop
     PRIVATE
-        fmt::fmt
+        fmt::fmt-header-only
         Microsoft.GSL::GSL
         Mono::Mono2
 )
 
+# TODO: This should ideally be set up as a custom target to be depended on.
 add_custom_command(TARGET csinterop POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:csinterop> $<TARGET_FILE_DIR:csinterop>
+    COMMAND ${CMAKE_COMMAND} -E copy ${MONO2_SHARED_LIBRARY} $<TARGET_FILE_DIR:csinterop>
     COMMAND_EXPAND_LISTS
 )
+
+# TODO: Copy Mono/etc and required Mono/lib files to output. Debug symbols should also be copied for Debug builds.

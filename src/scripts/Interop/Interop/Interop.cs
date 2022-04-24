@@ -13,14 +13,14 @@ public static class Interop
 {
     private static Configuration Config = new();
 
-    public static void Setup() => SetupAsync().Wait();
+    public static void Init() => InitAsync().Wait();
 
     public static void Update()
     {
         Console.WriteLine("Module updated.");
     }
 
-    private static async Task SetupAsync()
+    private static async Task InitAsync()
     {
         TomletMain.RegisterMapper(EnumSerializer, EnumDeserializer<TextureFiltering>);
         TomletMain.RegisterMapper(EnumSerializer, EnumDeserializer<TextureQuality>);
